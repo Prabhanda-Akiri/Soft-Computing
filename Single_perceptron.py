@@ -23,12 +23,7 @@ def main():
 	dataset=alter_datatypes(dataset,class_i)
 	output=categorize_op(dataset,class_i)
 
-	#print(weights)
-	weights=apply_learning_method(dataset,weights,class_i,l_rate,output)
-
-	print('\nThe final weights are:	\n',weights)
-
-	print('\nAccuracy is:	',get_accuracy(dataset,weights,class_i,output),'%\n')
+	apply_learning_method(dataset,weights,class_i,l_rate,output)
 
 def expected_op(row,w,ci):
 	op=0 
@@ -47,44 +42,35 @@ def apply_learning_method(dataset,w,ci,lr,op):
 	accu=[]
 	for i in range(1500):
 
-		#eops=[0 for k in range(len(dataset))]
-		#eops[ci]=1
-
 		for j in dataset:
 
 			eop=expected_op(j,w,ci)
 			z=op.index(j[ci])
 
-			#if eop==z:
-			#	eops[dataset.index(j)]=1
-
 			if eop!=z:
 				w=correct_wt(lr,w,z-eop,j,ci)		
-
 		l=[]
 		l.append(w)
 		p_acc=get_accuracy(dataset,w,ci,op)
-		#print('\nAccuracy is:	',p_acc,'%\n')
 		#print(p_acc)		
 		l.append(p_acc)
 
-		if i!=0:
-			if p_acc>accu[-1][1]:
-				accu.append(l)
-				#accu[-1].append(w)
-		elif i==0:
+		if i==0:			
 			accu.append(l)
-			#accu[-1].append(w)
-
-		if p_acc!=0:
+		else:
+			if p_acc>accu[-1][1]:
+				accu.append(l)	
+	
+		if int(p_acc)!=100:
 			continue
 		else:
 			break 
-	#for k in range(len(accu)): 
-	print(accu[len(accu)-1])
+	
+	maxm=accu[len(accu)-1]
 
+	print('\nThe final weights are:	\n',maxm[0])
 
-	return accu[len(accu)-1][0]
+	print('\nAccuracy is:	',maxm[1],'%\n')
 
 def get_accuracy(dataset,w,ci,op):
 
@@ -113,7 +99,7 @@ def categorize_op(dataset,ci):
 	for i in dataset:
 		if not i[ci] in diff:
 			diff.append(i[ci])
-
+	diff.reverse()
 	return diff
 
 def alter_datatypes(dataset,ci):
