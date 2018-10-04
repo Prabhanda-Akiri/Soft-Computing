@@ -1,5 +1,6 @@
 import csv
 import numpy as np 
+import random
 
 def main():
 
@@ -13,7 +14,8 @@ def main():
 
 	class_i=class_index(head)
 	d=dataset
-
+	random.shuffle(d)
+	
 	n=len(head)-1
 
 	dataset=alter_datatypes(dataset,class_i)
