@@ -29,7 +29,6 @@ def main():
 
 	apply_genetic_algo(nof_attrs,d,Attr_nd,class_i,output)
 
-
 def apply_genetic_algo(nof_attrs,dataset,Attr_nd,class_i,output):
 
 	
@@ -39,38 +38,38 @@ def apply_genetic_algo(nof_attrs,dataset,Attr_nd,class_i,output):
 
 	chromosomes=initialize_chromosomes(population_size,nof_attrs)
 
-	max_iterations=500
+	max_iterations=50
 	accuracy_not_100=True
 	iterations=0
 
 	while iterations<max_iterations and accuracy_not_100 :
 
 		Fitness=fitness_evaluate(population_size,chromosomes,dataset,class_i,Attr_nd,output,nof_attrs)
-
+		
 		chromosomes=Selection(Fitness,population_size,chromosomes)
 		chromosomes=cross_over(cross_over_rate,chromosomes,population_size,nof_attrs)
 		chromosomes=mutation(mutation_rate,chromosomes,nof_attrs,population_size)
 
-		max_fitness=check_max_fitness(Fitness,population_size)
-		if max_fitness==100:
+		if iterations!=0:
+			prev_max=max_fitness
+			prev_sum=sum_fitness
+
+		max_fitness=max(Fitness)
+		sum_fitness=sum(Fitness)
+
+		if max_fitness==100 :
 			accuracy_not_100=False
+			print('\nReached maximum acuuracy of 100%\n')
+
+		if iterations!=0 and sum_fitness==prev_sum:
+			break;
 
 		iterations+=1
 
 	print("\n\nGenetic Algorithm\n")
 	print("\nMaximum Fitness of Naive Byes Classifier :	",max_fitness)
 	print("Achieved at ",iterations,"th iteration\n\nFor the chromosome :	\n",chromosomes[Fitness.index(max_fitness)])
-
-
-def check_max_fitness(Fitness,population_size):
-
-	max_fitness=Fitness[0]
-
-	for i in range(population_size):
-		if Fitness[i]>max_fitness:
-			max_fitness=Fitness[i]
-
-	return max_fitness
+	#,prev_chromosomes[Fitness.index(max_fitness)])
 
 def mutation(mutation_rate,chromosomes,nof_attrs,population_size):
 
@@ -109,9 +108,9 @@ def cross_over(cross_over_rate,chromosomes,population_size,nof_attrs):
 		c1=chromosomes[index1]
 		c2=chromosomes[index2]
 
-		nof_cov_attr=int(cross_over_rate*nof_attrs)
+		cov_point=random.randint(0,nof_attrs-1)
 
-		for i in range(0,nof_cov_attr):
+		for i in range(cov_point,nof_attrs):
 			temp=c1[i]
 			c1[i]=c2[i]
 			c2[i]=temp
@@ -171,16 +170,23 @@ class fitness:
 def fitness_evaluate(population_size,chromosomes,dataset,class_i,Attr_nd,output,nof_attrs):
 
 	Fitness=[]
-	training_dataset=dataset[: int(len(dataset) * 0.01*10*8)]
-	test_dataset=dataset[int(len(dataset) * 0.01*10*8):]
 
 	for i in range(population_size):
 
-		Attr_nd=apply_naive_bayes(nof_attrs,training_dataset,class_i,Attr_nd,output)
-		Fitness.append(find_accuracy(chromosomes[i],test_dataset,Attr_nd,class_i,output,nof_attrs))
+		acc=[]
+
+		for i in range(10):
+			random.shuffle(dataset)
+			test_dataset=dataset[int(len(dataset) * 0.01*10*i): int(len(dataset) * 0.01*10*(i+1))]
+			training_dataset=list_difference(dataset,test_dataset)
+			Attr_nd=apply_naive_bayes(nof_attrs,training_dataset,class_i,Attr_nd,output)
+			acc.append(find_accuracy(chromosomes[i],test_dataset,Attr_nd,class_i,output,nof_attrs))
+
+		avg_accu=sum(acc)/float(len(acc))
+		#avg_accu=max(acc)
+		Fitness.append(avg_accu)
 
 	return Fitness
-
 
 def initialize_chromosomes(population_size,nof_attrs):
 
@@ -191,7 +197,6 @@ def initialize_chromosomes(population_size,nof_attrs):
 			chromosomes[i].append(random.randint(0,1)) 
 
 	return chromosomes
-
 
 def list_difference(list1, list2):
 	
@@ -280,7 +285,6 @@ class nodes:
 		self.one_positive=0 
 		self.zero_negative=0 
 		self.one_negative=0
-
 
 def categorize_op(dataset,ci):
 
