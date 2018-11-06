@@ -62,16 +62,16 @@ def Calculate_Derivatives(X,Y,Y_p,Whx , Whh, Wyh, bh, by,L_values,no_hidden):
 
 			dhi_dti=1/math.exp(T[i])*((1+math.exp(-T[i]))**2)
 
-			ds_whx=Wyh[j][i]*dhi_dti*X[i][j]
+			ds_whx=Wyh[j][i%m]*dhi_dti*X[i][j]
 
 			if i!=0:
-				ds_whh=Wyh[j][i]*dhi_dti*H[i-1]
+				ds_whh=Wyh[j][i%m]*dhi_dti*H[i-1]
 			else:
 				ds_whh=0
 
 			ds_wyh=H[i]
 			ds_by=1
-			ds_bh=Wyh[j][i]*dhi_dti
+			ds_bh=Wyh[j][i%m]*dhi_dti
 
 
 			dl_whx+=dl_dy*dy_ds*ds_whx
